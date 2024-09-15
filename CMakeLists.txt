@@ -14,9 +14,16 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 
+
+add_library(net_raii STATIC
+    src/net_raii/socket.cpp
+    src/net_raii/file_descriptor.cpp
+    src/net_raii/connection.cpp
+)
+target_include_directories(net_raii PUBLIC include/)
+
 add_executable(server
     src/server/main.cpp
-    src/server/socket.cpp
-    src/server/file_descriptor.cpp
 )
 target_include_directories(server PUBLIC include/)
+target_link_libraries(server PUBLIC net_raii)

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace server {
+namespace net_raii {
 
 /// RAII Wrapper of linux file descriptor 
 class FileDescriptor {
@@ -26,4 +26,4 @@ protected:
 };
 
 
-} // namespace server
+} // namespace net_raii

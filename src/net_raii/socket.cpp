@@ -1,14 +1,15 @@
-#include "server/connection.hpp"
-#include "server/file_descriptor.hpp"
-#include <cstddef>
-#include <server/socket.hpp>
+#include <net_raii/socket.hpp>
 
 #include <stdexcept>
-#include <sys/socket.h>
-#include <unistd.h>
 #include <cstring>
 
-namespace server {
+#include <sys/socket.h>
+#include <unistd.h>
+
+#include <net_raii/connection.hpp>
+#include <net_raii/file_descriptor.hpp>
+
+namespace net_raii {
 
 TcpSocket::TcpSocket() : 
     FileDescriptor(), 
@@ -52,4 +53,4 @@ TcpConnection TcpSocket::accept_connection() {
 }
 
 
-} // namespace server
+} // namespace net_raii

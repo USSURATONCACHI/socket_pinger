@@ -1,7 +1,7 @@
-#include <server/file_descriptor.hpp>
+#include <net_raii/file_descriptor.hpp>
 #include <unistd.h>
 
-namespace server {
+namespace net_raii {
 
 
 FileDescriptor::FileDescriptor() 
@@ -46,4 +46,4 @@ FileDescriptor& FileDescriptor::operator=(FileDescriptor&& move_from) {
 }
 
 
-} // namespace server
+} // namespace net_raii

@@ -2,11 +2,11 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-#include <server/file_descriptor.hpp>
-#include <server/connection.hpp>
+#include <net_raii/file_descriptor.hpp>
+#include <net_raii/connection.hpp>
 
 
-namespace server {
+namespace net_raii {
 
 /// RAII Wrapper of sys/socket.h 
 class TcpSocket : public FileDescriptor {
@@ -24,4 +24,4 @@ protected:
 };
 
 
-} // namespace server
+} // namespace net_raii
