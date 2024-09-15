@@ -1,6 +1,10 @@
 #include <net_raii/file_descriptor.hpp>
 #include <unistd.h>
 
+#include <vector>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+
 namespace net_raii {
 
 
@@ -43,6 +47,26 @@ FileDescriptor& FileDescriptor::operator=(FileDescriptor&& move_from) {
         move_from.m_file_descriptor = -1;
     }
     return *this;
+}
+
+
+void FileDescriptor::send(const std::string& message) {
+    ::send(get_file_descriptor(), message.c_str(), message.length(), 0);
+}
+std::string FileDescriptor::recv() {
+    std::vector<char> result;
+
+    size_t bytes_read;
+    do {
+        char buffer[1024];
+        result.reserve(sizeof(buffer));
+        bytes_read = ::read(get_file_descriptor(), buffer, sizeof(buffer));
+
+        result.insert(result.end(), buffer, buffer + bytes_read);
+    } while (bytes_read > 0);
+
+    std::string str(result.begin(), result.end());
+    return str;
 }
 
 

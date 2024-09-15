@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace net_raii {
 
 /// RAII Wrapper of linux file descriptor 
@@ -20,6 +22,10 @@ public:
     // Movable
     FileDescriptor(FileDescriptor&& move_from);
     FileDescriptor& operator=(FileDescriptor&& move_from);
+
+
+    void send(const std::string& message);
+    std::string recv();
 
 protected:
     int m_file_descriptor;

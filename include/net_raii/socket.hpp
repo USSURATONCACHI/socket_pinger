@@ -20,9 +20,6 @@ public:
     void connect_to_addr(in_addr_t address, in_port_t port);
     void allow_listen();
 
-    void send(const std::string& message);
-    std::string recv();
-
     TcpConnection accept_connection();
 
     in_addr_t address_from_text(const std::string& text);

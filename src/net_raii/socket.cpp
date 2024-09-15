@@ -79,23 +79,5 @@ in_addr_t TcpSocket::address_from_text(const std::string& text) {
     return addr;
 }
 
-void TcpSocket::send(const std::string& message) {
-    ::send(get_file_descriptor(), message.c_str(), message.length(), 0);
-}
-std::string TcpSocket::recv() {
-    std::vector<char> result;
-
-    size_t bytes_read;
-    do {
-        char buffer[1024];
-        result.reserve(sizeof(buffer));
-        bytes_read = ::read(m_file_descriptor, buffer, sizeof(buffer));
-
-        result.insert(result.end(), buffer, buffer + bytes_read);
-    } while (bytes_read > 0);
-
-    std::string str(result.begin(), result.end());
-    return str;
-}
 
 } // namespace net_raii
