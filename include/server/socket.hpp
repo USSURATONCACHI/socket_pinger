@@ -1,32 +1,22 @@
 #pragma once
 
+#include <server/file_descriptor.hpp>
 #include <netinet/in.h>
+#include <sys/socket.h>
 
 namespace server {
 
 /// RAII Wrapper of sys/socket.h 
-class Ipv4TcpSocket {
+class TcpSocket : public FileDescriptor {
 public:
-    Ipv4TcpSocket();
-    static Ipv4TcpSocket create_socket();
-
-    ~Ipv4TcpSocket();
-
-    bool is_init() const;
-    int get_file_descriptor() const;
-
-    // Non-copyable
-    Ipv4TcpSocket(const Ipv4TcpSocket&) = delete;
-    Ipv4TcpSocket& operator=(const Ipv4TcpSocket&) = delete;
-
-    // Movable
-    Ipv4TcpSocket(Ipv4TcpSocket&& move_from);
-    Ipv4TcpSocket& operator=(Ipv4TcpSocket&& move_from);
+    TcpSocket();
+    TcpSocket(sa_family_t net_family);
 
     void bind_addr(in_addr_t address, in_port_t port);
+    void allow_listen();
 
-private:
-    int m_socket_fd;
+protected:
+    sa_family_t m_net_family;
 };
 
 

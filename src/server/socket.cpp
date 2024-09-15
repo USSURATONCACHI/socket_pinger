@@ -1,3 +1,4 @@
+#include "server/file_descriptor.hpp"
 #include <server/socket.hpp>
 
 #include <stdexcept>
@@ -7,60 +8,36 @@
 
 namespace server {
 
-/// RAII Wrapper of sys/socket.h 
-Ipv4TcpSocket::Ipv4TcpSocket() 
-    : m_socket_fd(-1)
+TcpSocket::TcpSocket() : 
+    FileDescriptor(), 
+    m_net_family(AF_INET)
 {}
 
-Ipv4TcpSocket Ipv4TcpSocket::create_socket() {
-    Ipv4TcpSocket s;
-
-    s.m_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-
-    if (s.m_socket_fd == -1)
-        throw new std::runtime_error("Failed to create a socket.");
-
-    return s;
-}
-
-bool Ipv4TcpSocket::is_init() const {
-    return m_socket_fd != -1;
-}
-
-int Ipv4TcpSocket::get_file_descriptor() const {
-    return m_socket_fd;
-}
-
-Ipv4TcpSocket::~Ipv4TcpSocket() {
-    if (m_socket_fd != -1)
-        close(m_socket_fd);
-}
-
-Ipv4TcpSocket::Ipv4TcpSocket(Ipv4TcpSocket&& move_from) 
-    : m_socket_fd(move_from.m_socket_fd)
+TcpSocket::TcpSocket(sa_family_t net_family) : 
+    FileDescriptor(socket(net_family, SOCK_STREAM, 0)),
+    m_net_family(net_family)
 {
-    move_from.m_socket_fd = -1;
+    if (get_file_descriptor() == -1)
+        throw new std::runtime_error("Failed to create a socket.");
 }
 
-Ipv4TcpSocket& Ipv4TcpSocket::operator=(Ipv4TcpSocket&& move_from) {
-    if (this != &move_from) {
-        m_socket_fd = move_from.m_socket_fd;
-        move_from.m_socket_fd = -1;
-    }
-    return *this;
-}
-
-void Ipv4TcpSocket::bind_addr(in_addr_t address, in_port_t port) {
+void TcpSocket::bind_addr(in_addr_t address, in_port_t port) {
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family      = AF_INET; // IPv4
+    server_addr.sin_family      = m_net_family; // IPv4
     server_addr.sin_addr.s_addr = address;   
     server_addr.sin_port        = port;
 
-    int bind_result = bind(m_socket_fd, (struct sockaddr*) &server_addr, sizeof(server_addr));
+    int bind_result = bind(get_file_descriptor(), (struct sockaddr*) &server_addr, sizeof(server_addr));
 
     if (bind_result == -1)
-        throw std::runtime_error("Failed to bind to address");
+        throw std::runtime_error("Failed to bind to address.");
+}
+
+void TcpSocket::allow_listen() {
+    int listen_result = listen(get_file_descriptor(), SOMAXCONN);
+    if (listen_result == -1)
+        throw std::runtime_error("Failed to listen on socket.");
 }
 
 } // namespace server

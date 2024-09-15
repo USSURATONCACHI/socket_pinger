@@ -1,13 +1,15 @@
 #include <server/file_descriptor.hpp>
-
-#include <stdexcept>
 #include <unistd.h>
 
 namespace server {
 
-/// RAII Wrapper of sys/socket.h 
+
 FileDescriptor::FileDescriptor() 
     : m_file_descriptor(-1)
+{}
+
+FileDescriptor::FileDescriptor(int fd) 
+    : m_file_descriptor(fd)
 {}
 
 bool FileDescriptor::is_init() const {

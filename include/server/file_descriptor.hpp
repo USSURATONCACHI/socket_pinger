@@ -21,7 +21,7 @@ public:
     FileDescriptor(FileDescriptor&& move_from);
     FileDescriptor& operator=(FileDescriptor&& move_from);
 
-private:
+protected:
     int m_file_descriptor;
 };
 
