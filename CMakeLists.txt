@@ -16,5 +16,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 add_executable(server
     src/server/main.cpp
+    src/server/socket.cpp
 )
 target_include_directories(server PUBLIC include/)
