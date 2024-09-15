@@ -1,3 +1,4 @@
+#include "server/connection.hpp"
 #include <iostream>
 #include <server/socket.hpp>
 
@@ -14,10 +15,15 @@ int main() {
     std::cout << "Socket created" << std::endl;
 
     socket.allow_listen();
+    std::cout << "Socket listening..." << std::endl;
 
-    // while(true) {
-        
-    // }
+    while(true) {
+        server::TcpConnection conn = socket.accept_connection();
+
+        char buffer[1024] = {0};
+        recv(conn.get_file_descriptor(), buffer, sizeof(buffer), 0);
+        std::cout << "Message from client: " << buffer << std::endl;
+    }
 
     return 0;
 }
