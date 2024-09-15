@@ -27,3 +27,9 @@ add_executable(server
 )
 target_include_directories(server PUBLIC include/)
 target_link_libraries(server PUBLIC net_raii)
+
+add_executable(client
+    src/client/main.cpp
+)
+target_include_directories(client PUBLIC include/)
+target_link_libraries(client PUBLIC net_raii)
