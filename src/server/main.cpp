@@ -20,10 +20,16 @@ int main() {
 
     while(true) {
         net_raii::TcpConnection conn = socket.accept_connection();
+        std::cout << "Accepted connection." << std::endl;
 
         char buffer[1024] = {0};
-        recv(conn.get_file_descriptor(), buffer, sizeof(buffer), 0);
-        std::cout << "Message from client: " << buffer << std::endl;
+        size_t bytes_read = recv(conn.get_file_descriptor(), buffer, sizeof(buffer) - 1, 0);
+        buffer[bytes_read] = '\0';
+
+        if (bytes_read > 0)
+            std::cout << "Message from client: " << buffer << std::endl;
+        else
+            std::cout << "Connection ended." << std::endl;
     }
 
     return 0;
