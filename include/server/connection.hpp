@@ -6,9 +6,9 @@
 namespace server {
 
 /// RAII Wrapper of sys/socket.h TCP connection
-class TcpConnection : FileDescriptor {
+class TcpConnection : public FileDescriptor {
 public:
-
+    using FileDescriptor::FileDescriptor; // using FileDescriptor constructors
 };
 
 

@@ -1,4 +1,6 @@
+#include "server/connection.hpp"
 #include "server/file_descriptor.hpp"
+#include <cstddef>
 #include <server/socket.hpp>
 
 #include <stdexcept>
@@ -39,5 +41,15 @@ void TcpSocket::allow_listen() {
     if (listen_result == -1)
         throw std::runtime_error("Failed to listen on socket.");
 }
+
+TcpConnection TcpSocket::accept_connection() {
+    int client_fd = accept(get_file_descriptor(), nullptr, nullptr);
+
+    if (client_fd == -1)
+        throw std::runtime_error("Failed to accept connection.");
+
+    return TcpConnection(client_fd);
+}
+
 
 } // namespace server
