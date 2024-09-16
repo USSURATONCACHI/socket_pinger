@@ -15,7 +15,6 @@ static void run_server(int port);
 struct Params {
     int port;
 };
-// Returns either Params, or a string error
 static Params parse_input(int argc, const char* const* argv, bool& out_error);
 
 int main(int argc, char** argv) {
