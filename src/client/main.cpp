@@ -9,28 +9,24 @@
 #include <sys/socket.h>
 
 #define SERVER_ADDRESS "127.0.0.1"
-#define SERVER_PORT 5123
 
 int main() {
-    std::cout << "Hello, world!" << std::endl;
+    std::string name = "Client 1";
+    int server_port = 5123;
+    double sending_period = 2.0;
+
+    uint64_t period_microsec = (uint64_t)(sending_period * 1000.0 * 1000.0);
 
     net_raii::TcpSocket socket(AF_INET);
     std::cout << "Socket created" << std::endl;
 
     in_addr_t addr = socket.address_from_text(SERVER_ADDRESS);
-    socket.connect_to_addr(addr, htons(SERVER_PORT));
+    socket.connect_to_addr(addr, htons(server_port));
     std::cout << "Socket connected" << std::endl;
 
-    
-    socket.send_with_len("Hello, im client!\n");
-
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-
-    socket.send_with_len("Hello, im client2!\n");
-
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-
-    socket.send_with_len("Hello, im client3!\n");
-
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    while (true) {
+        std::cout << "Sending from " << name << std::endl;
+        socket.send_with_len(name + "\n");
+        std::this_thread::sleep_for(std::chrono::microseconds(period_microsec));
+    }
 }
