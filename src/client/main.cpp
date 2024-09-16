@@ -36,12 +36,18 @@ static void run_client(Params p) {
     socket.connect_to_addr(addr, htons(p.port));
     std::cout << "Socket connected" << std::endl;
 
+    auto cycle_start = std::chrono::system_clock::now();
     while (true) {
+        // We need this for precise send times
+        auto next_cycle = cycle_start + std::chrono::microseconds(period_microsec);
+
         std::cout << "Sending (" << p.name << ")" << std::endl;
 
         std::string msg = "[" + get_current_time() + "] " + p.name;
         socket.send_with_len(msg);
-        std::this_thread::sleep_for(std::chrono::microseconds(period_microsec));
+
+        std::this_thread::sleep_until(next_cycle);
+        cycle_start = next_cycle;
     }
 }
 
