@@ -13,13 +13,31 @@ Socket listening...
 
 ## client
 
-Пока что просто запускается и подключается к серверу на порт 5123:
+Принимает аргументы: имя клиента, порт сервера, период отправки в секундах:
 ```bash
-$ ./build/client
+$ ./build/client Client17 5000 0.33
 Socket created
 Socket connected
-Sending from Client 1
-Sending from Client 1
+Sending (Client17)
+Sending (Client17)
+Sending (Client17)
+Sending (Client17)
+Sending (Client17)
+^C
+```
+
+Тем временем на сервере:
+```bash
+$ ./build/server 5000
+Socket created (port = 5000)
+Socket listening...
+...
+Accepted connection.
+Message: Client17
+Message: Client17
+Message: Client17
+Message: Client17
+Message: Client17
+Connection ended.
 ...
 ```
-Отсылает сообщение "Client 1" раз в 2 секунды.
