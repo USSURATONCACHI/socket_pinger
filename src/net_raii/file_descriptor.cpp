@@ -4,7 +4,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <vector>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
@@ -90,7 +89,7 @@ std::string FileDescriptor::recv_with_len(bool* out_has_disconnected) {
     } while(total_bytes_read < length && !should_stop);
     
     buffer[total_bytes_read] = '\0';
-    
+
     std::string str(buffer);
     return str;
 }
