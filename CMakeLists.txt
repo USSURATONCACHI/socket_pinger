@@ -24,6 +24,7 @@ target_include_directories(net_raii PUBLIC include/)
 
 add_executable(server
     src/server/main.cpp
+    src/server/parsing.cpp
 )
 target_include_directories(server PUBLIC include/)
 target_link_libraries(server PUBLIC net_raii)

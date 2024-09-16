@@ -6,6 +6,7 @@
 
 #include <net_raii/connection.hpp>
 #include <net_raii/socket.hpp>
+#include <server/parsing.hpp>
 
 
 using WriteFn = std::function<void(const std::string&)>;
@@ -14,11 +15,8 @@ static void handle_connection(net_raii::TcpConnection&& conn, WriteFn* write);
 static void run_server(int port, WriteFn* write);
 
 static void write_to_file_safe(const std::string& message, std::mutex& file_mutex, std::ofstream& log_file);
+// static void cout_safe(const std::string& message);
 
-struct Params {
-    int port;
-};
-static Params parse_input(int argc, const char* const* argv, bool& out_error);
 
 int main(int argc, char** argv) {
     bool had_error = false;
@@ -39,28 +37,6 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-static Params parse_input(int argc, const char* const* argv, bool& out_error) {
-    if (argc != 2) {
-        std::cerr << "Incorrect input args" << std::endl;
-        out_error = true;
-        return Params();
-    }
-
-    Params result;
-    try {
-        result.port = std::stoi(argv[1]);
-    } 
-    catch (const std::invalid_argument& e) {
-        out_error = true;
-        std::cerr << "Invalid argument: " << e.what() << std::endl;
-    }
-    catch (const std::out_of_range& e) {
-        out_error = true;
-        std::cerr << "Out of range exception: " << e.what() << std::endl;
-    }
-
-    return result;
-}
 
 static void run_server(int port, WriteFn* write) {
     net_raii::TcpSocket socket(AF_INET); // Ipv4
@@ -80,6 +56,7 @@ static void run_server(int port, WriteFn* write) {
     }
 }
 
+// Utilities
 static void handle_connection(net_raii::TcpConnection&& conn, WriteFn* write) {
     bool has_disconnected = false;
     do {
