@@ -1,4 +1,7 @@
+#include <cerrno>
+#include <cstdint>
 #include <net_raii/file_descriptor.hpp>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include <vector>
@@ -50,22 +53,45 @@ FileDescriptor& FileDescriptor::operator=(FileDescriptor&& move_from) {
 }
 
 
-void FileDescriptor::send(const std::string& message) {
+    // Sends: first 4 bytes of message byte length, then the message itself 
+    void send_with_len(const std::string& message);
+    std::string recv_with_len(bool* out_has_disconnected = nullptr);
+
+void FileDescriptor::send_with_len(const std::string& message) {
+    uint32_t length = message.length();
+
+    ::send(get_file_descriptor(), &length, sizeof(length), 0);
     ::send(get_file_descriptor(), message.c_str(), message.length(), 0);
 }
-std::string FileDescriptor::recv() {
-    std::vector<char> result;
 
-    size_t bytes_read;
+std::string FileDescriptor::recv_with_len(bool* out_has_disconnected) {
+    uint32_t length = 0;
+    ssize_t bytes_read = ::read(get_file_descriptor(), &length, sizeof(length));
+
+    if (bytes_read < 1) {
+        (*out_has_disconnected) = true;
+        return "";
+    }
+
+    char* buffer = new char[length];
+    
+    ssize_t total_bytes_read = 0;
+    bool should_stop = false;
     do {
-        char buffer[1024];
-        result.reserve(sizeof(buffer));
-        bytes_read = ::read(get_file_descriptor(), buffer, sizeof(buffer));
+        ssize_t this_packet_read = ::read(get_file_descriptor(), buffer + total_bytes_read, length - total_bytes_read);
 
-        result.insert(result.end(), buffer, buffer + bytes_read);
-    } while (bytes_read > 0);
+        if (this_packet_read < 1) {
+            should_stop = true;
+            (*out_has_disconnected) = true;
+            this_packet_read = 0;
+        }
 
-    std::string str(result.begin(), result.end());
+        total_bytes_read += this_packet_read;
+    } while(total_bytes_read < length && !should_stop);
+    
+    buffer[total_bytes_read] = '\0';
+    
+    std::string str(buffer);
     return str;
 }
 

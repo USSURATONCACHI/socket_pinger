@@ -24,8 +24,9 @@ public:
     FileDescriptor& operator=(FileDescriptor&& move_from);
 
 
-    void send(const std::string& message);
-    std::string recv();
+    // Sends: first 4 bytes of message byte length, then the message itself 
+    void send_with_len(const std::string& message);
+    std::string recv_with_len(bool* out_has_disconnected = nullptr);
 
 protected:
     int m_file_descriptor;

@@ -1,5 +1,7 @@
 #include <cassert>
+#include <chrono>
 #include <iostream>
+#include <thread>
 
 #include <net_raii/socket.hpp>
 #include <netinet/in.h>
@@ -19,5 +21,16 @@ int main() {
     socket.connect_to_addr(addr, htons(SERVER_PORT));
     std::cout << "Socket connected" << std::endl;
 
-    socket.send("Hello, im client!");
+    
+    socket.send_with_len("Hello, im client!\n");
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    socket.send_with_len("Hello, im client2!\n");
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    socket.send_with_len("Hello, im client3!\n");
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 }
