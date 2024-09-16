@@ -6,7 +6,9 @@
 
 #include <net_raii/connection.hpp>
 #include <net_raii/socket.hpp>
+
 #include <server/parsing.hpp>
+#include <server/cout_safe.hpp>
 
 
 using WriteFn = std::function<void(const std::string&)>;
@@ -15,15 +17,13 @@ static void handle_connection(net_raii::TcpConnection&& conn, WriteFn* write);
 static void run_server(int port, WriteFn* write);
 
 static void write_to_file_safe(const std::string& message, std::mutex& file_mutex, std::ofstream& log_file);
-// static void cout_safe(const std::string& message);
-
 
 int main(int argc, char** argv) {
     bool had_error = false;
     Params p = parse_input(argc, argv, had_error);
 
     if (had_error) {
-        std::cout << "Usage: " << argv[0] << " <port>" << std::endl;
+        cout_safe("Usage: ", argv[0], " <port>");
         return 1;
     }
     
@@ -49,28 +49,29 @@ static void run_server(int port, WriteFn* write) {
 
     while(true) {
         net_raii::TcpConnection conn = socket.accept_connection();
-        std::cout << "Accepted connection." << std::endl;
+        cout_safe("Accepted connection.\n");
 
         std::thread new_thread(handle_connection, std::move(conn), write);
         new_thread.detach();
     }
 }
 
-// Utilities
 static void handle_connection(net_raii::TcpConnection&& conn, WriteFn* write) {
     bool has_disconnected = false;
     do {
         std::string msg = conn.recv_with_len(&has_disconnected);
 
         if (msg.length() > 0) {
-            std::cout << "Message: " << msg << std::endl;
+            cout_safe("Message: ", msg, "\n");
             (*write)(msg);
         }
     } while(!has_disconnected);
 
-    std::cout << "Connection ended." << std::endl;
+    cout_safe("Connection ended.\n");
 }
 
+
+// Utilities
 static void write_to_file_safe(const std::string& message, std::mutex& file_mutex, std::ofstream& log_file) {
     std::lock_guard<std::mutex> lock(file_mutex);
     if (log_file) {
