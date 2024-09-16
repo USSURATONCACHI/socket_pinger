@@ -1,27 +1,17 @@
-#include <cassert>
-#include <chrono>
-#include <exception>
+#include <ctime>
+#include <iomanip>
 #include <iostream>
-#include <string>
+#include <sstream>
 #include <thread>
+#include <chrono>
 
 #include <net_raii/socket.hpp>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
+#include <client/parsing.hpp>
 
 #define SERVER_ADDRESS "127.0.0.1"
 
-struct Params {
-    int port;
-    std::string name;
-    double sending_period;
-};
-static Params parse_input(int argc, const char* const* argv, bool& out_error);
-static double parse_double(const char* arg, bool& out_error);
-static int parse_int(const char* arg, bool& out_error);
-
 static void run_client(Params p);
+static std::string get_current_time();
 
 int main(int argc, char** argv) {
     bool had_error = false;
@@ -49,54 +39,22 @@ static void run_client(Params p) {
     while (true) {
         std::cout << "Sending (" << p.name << ")" << std::endl;
 
-        socket.send_with_len(p.name);
+        std::string msg = "[" + get_current_time() + "] " + p.name;
+        socket.send_with_len(msg);
         std::this_thread::sleep_for(std::chrono::microseconds(period_microsec));
     }
 }
 
+static std::string get_current_time() {
+    auto now = std::chrono::system_clock::now();
+    std::time_t now_time_t = std::chrono::system_clock::to_time_t(now);
+    std::tm now_tm = *std::localtime(&now_time_t);
+    
+    auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
 
-// --- Parsing
-static Params parse_input(int argc, const char* const* argv, bool& out_error) {
-    if (argc != 4) { // name, port,  period
-        std::cerr << "Incorrect input args" << std::endl;
-        out_error = true;
-        return Params();
-    }
+    std::ostringstream oss;
+    oss << std::put_time(&now_tm, "%Y-%m-%d %H:%M:%S") << ".";
+    oss << std::setw(3) << std::setfill('0') << now_ms.count();
 
-    Params result {
-        .port = parse_int(argv[2], out_error),
-        .name = std::string(argv[1]),
-        .sending_period = parse_double(argv[3], out_error),
-    };
-
-    return result;
-}
-
-static int parse_int(const char* arg, bool& out_error) {
-    int result = 0;
-    try {
-        result = std::stoi(arg);
-    } 
-    catch (const std::invalid_argument& e) {
-        out_error = true;
-        std::cerr << "Invalid argument '" << arg << "': " << e.what() << std::endl;
-    }
-    catch (const std::out_of_range& e) {
-        out_error = true;
-        std::cerr << "Out of range exception on '" << arg << "': " << e.what() << std::endl;
-    }
-
-    return result;
-}
-
-static double parse_double(const char* arg, bool& out_error) {
-    double res = 1.0;
-    try {
-        res = std::stod(arg);
-    } 
-    catch (const std::exception& e) {
-        out_error = true;
-        std::cerr << "Invalid argument '" << arg << "': " << e.what() << std::endl;
-    }
-    return res;
+    return oss.str();
 }
